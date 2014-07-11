@@ -1,0 +1,211 @@
+/*
+ * Copyright 2013 Stackify
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.stackify.log.log4j12;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LocationInfo;
+import org.apache.log4j.spi.LoggingEvent;
+import org.apache.log4j.spi.ThrowableInformation;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.google.common.base.Optional;
+import com.stackify.api.EnvironmentDetail;
+import com.stackify.api.LogMsg;
+import com.stackify.api.StackifyError;
+
+/**
+ * LoggingEventAdapter JUnit Test
+ * @author Eric Martin
+ */
+public class LoggingEventAdapterTest {
+
+	/**
+	 * testGetPropertiesWithoutMdcOrNdc
+	 */
+	@Test
+	public void testGetPropertiesWithoutMdcOrNdc() {
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Map<String, String> properties = adapter.getProperties(event);
+
+		Assert.assertNotNull(properties);
+		Assert.assertEquals(0, properties.size());
+	}
+	
+	/**
+	 * testGetPropertiesWithMdc
+	 */
+	@Test
+	public void testGetPropertiesWithMdc() {
+		Map<String, String> mdcProperties = new HashMap<String, String>();
+		mdcProperties.put("mdc1", "val1");
+		mdcProperties.put("mdc2", "val2");
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getProperties()).thenReturn(mdcProperties);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Map<String, String> properties = adapter.getProperties(event);
+
+		Assert.assertNotNull(properties);
+		Assert.assertEquals(2, properties.size());
+		Assert.assertEquals("val1", properties.get("mdc1"));
+		Assert.assertEquals("val2", properties.get("mdc2"));
+	}
+	
+	/**
+	 * testGetPropertiesWithNdc
+	 */
+	@Test
+	public void testGetPropertiesWithNdc() {
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getNDC()).thenReturn("ndcContext");
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Map<String, String> properties = adapter.getProperties(event);
+
+		Assert.assertNotNull(properties);
+		Assert.assertEquals(1, properties.size());
+		Assert.assertEquals("ndcContext", properties.get("NDC"));
+	}
+
+	/**
+	 * testGetPropertiesWithMdcAndNdc
+	 */
+	@Test
+	public void testGetPropertiesWithMdcAndNdc() {
+		Map<String, String> mdcProperties = new HashMap<String, String>();
+		mdcProperties.put("mdc1", "val1");
+		mdcProperties.put("mdc2", "val2");
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getProperties()).thenReturn(mdcProperties);
+		Mockito.when(event.getNDC()).thenReturn("ndcContext");
+
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Map<String, String> properties = adapter.getProperties(event);
+
+		Assert.assertNotNull(properties);
+		Assert.assertEquals(3, properties.size());
+		Assert.assertEquals("val1", properties.get("mdc1"));
+		Assert.assertEquals("val2", properties.get("mdc2"));
+		Assert.assertEquals("ndcContext", properties.get("NDC"));
+	}
+	
+	/**
+	 * testGetThrowable
+	 */
+	@Test
+	public void testGetThrowable() {
+		ThrowableInformation throwableInfo = Mockito.mock(ThrowableInformation.class);
+		Mockito.when(throwableInfo.getThrowable()).thenReturn(new NullPointerException());
+
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getThrowableInformation()).thenReturn(throwableInfo);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Optional<Throwable> throwable = adapter.getThrowable(event);
+		
+		Assert.assertNotNull(throwable);
+		Assert.assertTrue(throwable.isPresent());
+	}
+	
+	/**
+	 * testGetThrowableFromMessage
+	 */
+	@Test
+	public void testGetThrowableFromMessage() {
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getMessage()).thenReturn(new NullPointerException());
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Optional<Throwable> throwable = adapter.getThrowable(event);
+		
+		Assert.assertNotNull(throwable);
+		Assert.assertTrue(throwable.isPresent());
+	}
+
+	/**
+	 * testGetThrowableAbsent
+	 */
+	@Test
+	public void testGetThrowableAbsent() {
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		Optional<Throwable> throwable = adapter.getThrowable(event);
+		
+		Assert.assertNotNull(throwable);
+		Assert.assertFalse(throwable.isPresent());
+	}
+	
+	/**
+	 * testGetLogMsg
+	 */
+	@Test
+	public void testGetLogMsg() {
+		String msg = "msg";
+		StackifyError ex = Mockito.mock(StackifyError.class);
+		String th = "th";
+		String level = "debug";
+		String srcMethod = "srcMethod";
+		Integer srcLine = Integer.valueOf(14);
+		
+		LocationInfo locInfo = Mockito.mock(LocationInfo.class);
+		Mockito.when(locInfo.getMethodName()).thenReturn(srcMethod);
+		Mockito.when(locInfo.getLineNumber()).thenReturn(srcLine.toString());
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getMessage()).thenReturn(msg);
+		Mockito.when(event.getThreadName()).thenReturn(th);
+		Mockito.when(event.getLevel()).thenReturn(Level.DEBUG);
+		Mockito.when(event.getLocationInformation()).thenReturn(locInfo);
+
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		LogMsg logMsg = adapter.getLogMsg(event, Optional.of(ex));
+		
+		Assert.assertNotNull(logMsg);
+		Assert.assertEquals(msg, logMsg.getMsg());
+		Assert.assertNull(logMsg.getData());
+		Assert.assertEquals(ex, logMsg.getEx());		
+		Assert.assertEquals(th, logMsg.getTh());		
+		Assert.assertEquals(level, logMsg.getLevel());			
+		Assert.assertEquals(srcMethod, logMsg.getSrcMethod());		
+		Assert.assertEquals(srcLine, logMsg.getSrcLine());		
+	}
+	
+	/**
+	 * testGetStackifyError
+	 */
+	@Test
+	public void testGetStackifyError() {
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getMessage()).thenReturn("Exception message");
+		
+		Throwable exception = Mockito.mock(Throwable.class);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		StackifyError error = adapter.getStackifyError(event, exception);
+		
+		Assert.assertNotNull(error);
+	}
+}
