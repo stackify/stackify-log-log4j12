@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis-ci.org/stackify/stackify-log-log4j12.png)](https://travis-ci.org/stackify/stackify-log-log4j12)
 
-Log4j 1.2 logger appender for sending log messages to Stackify.
+Log4j 1.2 appenders for sending log messages and exceptions to Stackify.
+
+Error Logging and Monitoring Overview:
+
+http://docs.stackify.com/s/3095/m/7787/l/189767-error-logging-and-monitoring-overview
 
 Logging Overview:
 
@@ -36,6 +40,30 @@ Be sure to shutdown Log4j to flush this appender of any errors and shutdown the 
 LogManager.shutdown();
 ```
 
+## Usage (Exceptions Only)
+
+Example appender configuration (*.properties file):
+```
+log4j.appender.STACKIFY_ERROR=com.stackify.log.log4j12.StackifyErrorAppender
+log4j.appender.STACKIFY_ERROR.apiKey=YOUR_API_KEY
+log4j.appender.STACKIFY_ERROR.application=YOUR_APPLICATION_NAME
+log4j.appender.STACKIFY_ERROR.environment=YOUR_ENVIRONMENT
+```
+
+Example appender configuration (*.xml file):
+```xml
+<appender name="STACKIFY_ERROR" class="com.stackify.log.log4j12.StackifyErrorAppender">
+    <param name="apiKey" value="YOUR_API_KEY"/>
+    <param name="application" value="YOUR_APPLICATION_NAME"/>
+    <param name="environment" value="YOUR_ENVIRONMENT"/>
+</appender>
+```
+
+Be sure to shutdown Log4j to flush this appender of any errors and shutdown the background thread:
+```java
+LogManager.shutdown();
+```
+
 ## Installation
 
 Add it as a maven dependency:
@@ -43,7 +71,7 @@ Add it as a maven dependency:
 <dependency>
     <groupId>com.stackify</groupId>
     <artifactId>stackify-log-log4j12</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
