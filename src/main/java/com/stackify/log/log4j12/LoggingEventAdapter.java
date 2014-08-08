@@ -26,11 +26,14 @@ import org.apache.log4j.spi.ThrowableInformation;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.stackify.api.EnvironmentDetail;
 import com.stackify.api.LogMsg;
 import com.stackify.api.StackifyError;
+import com.stackify.api.WebRequestDetail;
 import com.stackify.api.common.lang.Throwables;
 import com.stackify.api.common.log.EventAdapter;
+import com.stackify.api.common.log.ServletLogContext;
 
 /**
  * LoggingEventAdapter
@@ -90,6 +93,20 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		builder.occurredEpochMillis(new Date(event.getTimeStamp()));
 		builder.error(Throwables.toErrorItem(getLogMessage(event), exception));
 		
+		Optional<String> user = ServletLogContext.getUser();
+		
+		if (user.isPresent()) {
+			builder.userName(user.get());
+		}
+		
+		Optional<WebRequestDetail> webRequest = ServletLogContext.getWebRequest();
+		
+		if (webRequest.isPresent()) {
+			builder.webRequestDetail(webRequest.get());
+		}
+		
+		builder.serverVariables(Maps.fromProperties(System.getProperties()));
+		
 		return builder.build();
 	}
 
@@ -114,6 +131,12 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		builder.epochMs(event.getTimeStamp());
 		builder.level(event.getLevel().toString().toLowerCase());
 
+		Optional<String> transactionId = ServletLogContext.getTransactionId();
+		
+		if (transactionId.isPresent()) {
+			builder.transId(transactionId.get());
+		}
+		
 		LocationInfo locInfo = event.getLocationInformation();
 		
 		if (locInfo != null) {			
