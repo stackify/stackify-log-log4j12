@@ -24,6 +24,7 @@ import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -45,6 +46,11 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 	 * Environment detail
 	 */
 	private final EnvironmentDetail envDetail;
+	
+	/**
+	 * JSON converter
+	 */
+	private final ObjectMapper json = new ObjectMapper();
 	
 	/**
 	 * Constructor
@@ -123,7 +129,11 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		Map<String, String> props = getProperties(event);
 		
 		if (!props.isEmpty()) {
-			builder.data(props.toString());
+			try {
+				builder.data(json.writeValueAsString(props.toString()));
+			} catch (Exception e) {
+				// do nothing
+			}
 		}
 				
 		builder.ex(error.orNull());
