@@ -17,6 +17,7 @@ package com.stackify.log.log4j12;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LocationInfo;
@@ -27,9 +28,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.stackify.api.EnvironmentDetail;
 import com.stackify.api.LogMsg;
 import com.stackify.api.StackifyError;
+import com.stackify.api.WebRequestDetail;
+import com.stackify.api.common.log.ServletLogContext;
 
 /**
  * LoggingEventAdapter JUnit Test
@@ -170,6 +174,9 @@ public class LoggingEventAdapterTest {
 		String srcMethod = "srcMethod";
 		Integer srcLine = Integer.valueOf(14);
 		
+		Map<String, String> properties = Maps.newHashMap();
+		properties.put("key", "value");
+		
 		LocationInfo locInfo = Mockito.mock(LocationInfo.class);
 		Mockito.when(locInfo.getMethodName()).thenReturn(srcMethod);
 		Mockito.when(locInfo.getLineNumber()).thenReturn(srcLine.toString());
@@ -179,17 +186,19 @@ public class LoggingEventAdapterTest {
 		Mockito.when(event.getThreadName()).thenReturn(th);
 		Mockito.when(event.getLevel()).thenReturn(Level.DEBUG);
 		Mockito.when(event.getLocationInformation()).thenReturn(locInfo);
+		Mockito.when(event.getProperties()).thenReturn(properties);
 
 		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
 		LogMsg logMsg = adapter.getLogMsg(event, Optional.of(ex));
 		
 		Assert.assertNotNull(logMsg);
 		Assert.assertEquals(msg, logMsg.getMsg());
-		Assert.assertNull(logMsg.getData());
+		Assert.assertEquals("{\"key\":\"value\"}", logMsg.getData());
 		Assert.assertEquals(ex, logMsg.getEx());		
 		Assert.assertEquals(th, logMsg.getTh());		
 		Assert.assertEquals(level, logMsg.getLevel());			
 		Assert.assertEquals(srcMethod, logMsg.getSrcMethod());		
+		Assert.assertEquals(srcLine, logMsg.getSrcLine());		
 		Assert.assertEquals(srcLine, logMsg.getSrcLine());		
 	}
 	
@@ -207,5 +216,48 @@ public class LoggingEventAdapterTest {
 		StackifyError error = adapter.getStackifyError(event, exception);
 		
 		Assert.assertNotNull(error);
+	}
+	
+	/**
+	 * testGetStackifyErrorServletContext
+	 */
+	@Test
+	public void testGetStackifyErrorServletContext() {
+		String user = "user";
+		ServletLogContext.putUser(user);
+		
+		WebRequestDetail webRequest = WebRequestDetail.newBuilder().build();
+		ServletLogContext.putWebRequest(webRequest);
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getMessage()).thenReturn("Exception message");
+		
+		Throwable exception = Mockito.mock(Throwable.class);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		StackifyError error = adapter.getStackifyError(event, exception);
+		
+		Assert.assertNotNull(error);
+		
+		Assert.assertEquals(user, error.getUserName());
+		Assert.assertNotNull(error.getWebRequestDetail());
+	}
+	
+	/**
+	 * testGetLogMsgServletContext
+	 */
+	@Test
+	public void testGetLogMsgServletContext() {
+		String transactionId = UUID.randomUUID().toString();
+		ServletLogContext.putTransactionId(transactionId);
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getLevel()).thenReturn(Level.DEBUG);
+
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		LogMsg logMsg = adapter.getLogMsg(event, Optional.<StackifyError>absent());
+		
+		Assert.assertNotNull(logMsg);
+		Assert.assertEquals(transactionId, logMsg.getTransId());
 	}
 }

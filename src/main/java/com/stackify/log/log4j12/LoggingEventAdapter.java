@@ -130,7 +130,7 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		
 		if (!props.isEmpty()) {
 			try {
-				builder.data(json.writeValueAsString(props.toString()));
+				builder.data(json.writeValueAsString(props));
 			} catch (Exception e) {
 				// do nothing
 			}
