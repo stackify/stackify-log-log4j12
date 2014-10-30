@@ -17,6 +17,7 @@ package com.stackify.log.log4j12;
 
 import org.apache.log4j.spi.LoggingEvent;
 
+import com.stackify.api.common.ApiClients;
 import com.stackify.api.common.ApiConfiguration;
 import com.stackify.api.common.ApiConfigurations;
 import com.stackify.api.common.log.LogAppender;
@@ -149,16 +150,20 @@ public class StackifyLogAppender extends NonReentrantAppender {
 		
 		ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, apiKey, application, environment);
 		
+		// get the client project name with version
+
+		String clientName = ApiClients.getApiClient("/stackify-log-log4j12.properties", "stackify-log-log4j12");
+
 		// build the log appender
 		
 		try {
-			this.logAppender = new LogAppender<LoggingEvent>("stackify-log-log4j12", new LoggingEventAdapter(apiConfig.getEnvDetail()));
+			this.logAppender = new LogAppender<LoggingEvent>(clientName, new LoggingEventAdapter(apiConfig.getEnvDetail()));
 			this.logAppender.activate(apiConfig);
 		} catch (Exception e) {
 			errorHandler.error("Exception starting the Stackify_LogBackgroundService", e, 0);
 		}
 	}
-
+	
 	/**
 	 * @see com.stackify.log.log4j12.NonReentrantAppender#subAppend(org.apache.log4j.spi.LoggingEvent)
 	 */
