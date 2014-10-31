@@ -152,7 +152,7 @@ public class StackifyLogAppender extends NonReentrantAppender {
 		
 		// get the client project name with version
 
-		String clientName = ApiClients.getApiClient("/stackify-log-log4j12.properties", "stackify-log-log4j12");
+		String clientName = ApiClients.getApiClient(StackifyLogAppender.class, "/stackify-log-log4j12.properties", "stackify-log-log4j12");
 
 		// build the log appender
 		
