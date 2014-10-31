@@ -50,7 +50,7 @@ Add it as a maven dependency:
 <dependency>
     <groupId>com.stackify</groupId>
     <artifactId>stackify-log-log4j12</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.10</version>
 </dependency>
 ```
 
