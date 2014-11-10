@@ -171,6 +171,7 @@ public class LoggingEventAdapterTest {
 		StackifyError ex = Mockito.mock(StackifyError.class);
 		String th = "th";
 		String level = "debug";
+		String srcClass = "srcClass";
 		String srcMethod = "srcMethod";
 		Integer srcLine = Integer.valueOf(14);
 		
@@ -178,6 +179,7 @@ public class LoggingEventAdapterTest {
 		properties.put("key", "value");
 		
 		LocationInfo locInfo = Mockito.mock(LocationInfo.class);
+		Mockito.when(locInfo.getClassName()).thenReturn(srcClass);
 		Mockito.when(locInfo.getMethodName()).thenReturn(srcMethod);
 		Mockito.when(locInfo.getLineNumber()).thenReturn(srcLine.toString());
 		
@@ -197,7 +199,7 @@ public class LoggingEventAdapterTest {
 		Assert.assertEquals(ex, logMsg.getEx());		
 		Assert.assertEquals(th, logMsg.getTh());		
 		Assert.assertEquals(level, logMsg.getLevel());			
-		Assert.assertEquals(srcMethod, logMsg.getSrcMethod());		
+		Assert.assertEquals(srcClass + "." + srcMethod, logMsg.getSrcMethod());		
 		Assert.assertEquals(srcLine, logMsg.getSrcLine());		
 		Assert.assertEquals(srcLine, logMsg.getSrcLine());		
 	}
@@ -259,5 +261,47 @@ public class LoggingEventAdapterTest {
 		
 		Assert.assertNotNull(logMsg);
 		Assert.assertEquals(transactionId, logMsg.getTransId());
+	}
+	
+	/**
+	 * 
+	 */
+	@Test
+	public void testIsErrorLevel() {
+		LoggingEvent debug = Mockito.mock(LoggingEvent.class);
+		Mockito.when(debug.getLevel()).thenReturn(Level.DEBUG);
+
+		LoggingEvent error = Mockito.mock(LoggingEvent.class);
+		Mockito.when(error.getLevel()).thenReturn(Level.ERROR);
+		
+		LoggingEvent fatal = Mockito.mock(LoggingEvent.class);
+		Mockito.when(fatal.getLevel()).thenReturn(Level.FATAL);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+
+		Assert.assertFalse(adapter.isErrorLevel(debug));
+		Assert.assertTrue(adapter.isErrorLevel(error));
+		Assert.assertTrue(adapter.isErrorLevel(fatal));
+	}
+	
+	/**
+	 * testGetStackifyErrorWithoutException
+	 */
+	@Test
+	public void testGetStackifyErrorWithoutException() {
+		LocationInfo locInfo = Mockito.mock(LocationInfo.class);
+		Mockito.when(locInfo.getClassName()).thenReturn("class");
+		Mockito.when(locInfo.getMethodName()).thenReturn("method");
+		Mockito.when(locInfo.getLineNumber()).thenReturn("123");
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getMessage()).thenReturn("Exception message");
+		Mockito.when(event.getLocationInformation()).thenReturn(locInfo);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+		StackifyError error = adapter.getStackifyError(event, null);
+		
+		Assert.assertNotNull(error);
+		Assert.assertEquals("StringException", error.getError().getErrorType());
 	}
 }

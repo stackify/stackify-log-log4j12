@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
@@ -97,7 +98,28 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		StackifyError.Builder builder = StackifyError.newBuilder();
 		builder.environmentDetail(envDetail);		
 		builder.occurredEpochMillis(new Date(event.getTimeStamp()));
-		builder.error(Throwables.toErrorItem(getLogMessage(event), exception));
+		
+		if (exception != null) {
+			builder.error(Throwables.toErrorItem(getMessage(event), exception));
+		} else {
+			String className = null;
+			String methodName = null;
+			int lineNumber = 0;
+			
+			LocationInfo locInfo = event.getLocationInformation();
+			
+			if (locInfo != null) {
+				className = locInfo.getClassName();
+				methodName = locInfo.getMethodName();
+				
+				try {
+					lineNumber = Integer.parseInt(locInfo.getLineNumber());
+				} catch (Throwable e) {
+				}
+			}
+			
+			builder.error(Throwables.toErrorItem(getMessage(event), className, methodName, lineNumber));
+		}
 		
 		Optional<String> user = ServletLogContext.getUser();
 		
@@ -124,7 +146,7 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		
 		LogMsg.Builder builder = LogMsg.newBuilder();
 		
-		builder.msg(getLogMessage(event));
+		builder.msg(getMessage(event));
 
 		Map<String, String> props = getProperties(event);
 		
@@ -146,11 +168,11 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		if (transactionId.isPresent()) {
 			builder.transId(transactionId.get());
 		}
-		
+
 		LocationInfo locInfo = event.getLocationInformation();
-		
+
 		if (locInfo != null) {			
-			builder.srcMethod(locInfo.getMethodName());
+			builder.srcMethod(locInfo.getClassName() + "." + locInfo.getMethodName());
 			
 			try {
 				builder.srcLine(Integer.parseInt(locInfo.getLineNumber()));
@@ -160,13 +182,13 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		
 		return builder.build();
 	}
-	
+
 	/**
-	 * Returns the log message
-	 * @param event The log event
-	 * @return The log message or null
+	 * Gets the log message from the event
+	 * @param event The event
+	 * @return The log message
 	 */
-	public String getLogMessage(final LoggingEvent event) {
+	public String getMessage(final LoggingEvent event) {
 		
 		Object message = event.getMessage();
 		
@@ -218,5 +240,13 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		// return the properties
 		
 		return properties;		
+	}
+
+	/**
+	 * @see com.stackify.api.common.log.EventAdapter#isErrorLevel(java.lang.Object)
+	 */
+	@Override
+	public boolean isErrorLevel(LoggingEvent event) {
+		return (event.getLevel() == Level.ERROR) || (event.getLevel() == Level.FATAL);
 	}
 }
