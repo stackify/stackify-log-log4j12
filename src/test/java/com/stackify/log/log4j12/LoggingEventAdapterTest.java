@@ -27,8 +27,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import com.stackify.api.EnvironmentDetail;
 import com.stackify.api.LogMsg;
 import com.stackify.api.StackifyError;
@@ -127,10 +125,9 @@ public class LoggingEventAdapterTest {
 		Mockito.when(event.getThrowableInformation()).thenReturn(throwableInfo);
 		
 		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
-		Optional<Throwable> throwable = adapter.getThrowable(event);
+		Throwable throwable = adapter.getThrowable(event);
 		
 		Assert.assertNotNull(throwable);
-		Assert.assertTrue(throwable.isPresent());
 	}
 	
 	/**
@@ -142,10 +139,9 @@ public class LoggingEventAdapterTest {
 		Mockito.when(event.getMessage()).thenReturn(new NullPointerException());
 		
 		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
-		Optional<Throwable> throwable = adapter.getThrowable(event);
+		Throwable throwable = adapter.getThrowable(event);
 		
 		Assert.assertNotNull(throwable);
-		Assert.assertTrue(throwable.isPresent());
 	}
 
 	/**
@@ -156,10 +152,9 @@ public class LoggingEventAdapterTest {
 		LoggingEvent event = Mockito.mock(LoggingEvent.class);
 		
 		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
-		Optional<Throwable> throwable = adapter.getThrowable(event);
+		Throwable throwable = adapter.getThrowable(event);
 		
-		Assert.assertNotNull(throwable);
-		Assert.assertFalse(throwable.isPresent());
+		Assert.assertNull(throwable);
 	}
 	
 	/**
@@ -175,7 +170,7 @@ public class LoggingEventAdapterTest {
 		String srcMethod = "srcMethod";
 		Integer srcLine = Integer.valueOf(14);
 		
-		Map<String, String> properties = Maps.newHashMap();
+		Map<String, String> properties = new HashMap<String, String>();
 		properties.put("key", "value");
 		
 		LocationInfo locInfo = Mockito.mock(LocationInfo.class);
@@ -191,7 +186,7 @@ public class LoggingEventAdapterTest {
 		Mockito.when(event.getProperties()).thenReturn(properties);
 
 		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
-		LogMsg logMsg = adapter.getLogMsg(event, Optional.of(ex));
+		LogMsg logMsg = adapter.getLogMsg(event, ex);
 		
 		Assert.assertNotNull(logMsg);
 		Assert.assertEquals(msg, logMsg.getMsg());
@@ -257,7 +252,7 @@ public class LoggingEventAdapterTest {
 		Mockito.when(event.getLevel()).thenReturn(Level.DEBUG);
 
 		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
-		LogMsg logMsg = adapter.getLogMsg(event, Optional.<StackifyError>absent());
+		LogMsg logMsg = adapter.getLogMsg(event, null);
 		
 		Assert.assertNotNull(logMsg);
 		Assert.assertEquals(transactionId, logMsg.getTransId());

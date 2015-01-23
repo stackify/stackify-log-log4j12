@@ -3,7 +3,7 @@
 
 	<groupId>com.stackify</groupId>
 	<artifactId>stackify-log-log4j12</artifactId>
-	<version>1.0.17-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	
 	<name>Stackify Log Appender for Log4j</name>
 	<description>Stackify Log Appender for Log4j</description>
@@ -11,8 +11,8 @@
 		<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+		<version>9</version>
+		</parent>
 	
 	<licenses>
     	<license>
@@ -46,13 +46,7 @@
 	<dependencies>
 	
 		<!-- Compile time dependencies -->
-		
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>13.0.1</version>
-		</dependency>
-			
+					
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -68,7 +62,7 @@
 		<dependency>
 		  	<groupId>com.stackify</groupId>
   			<artifactId>stackify-api-java</artifactId>
-  			<version>2.0.4</version>
+  			<version>2.1.0</version>
 		</dependency>
 								
 		<!-- Runtime dependencies -->
@@ -265,4 +259,5 @@
 		</profile>
 	</profiles>
 	
+	<packaging>ear</packaging>
 </project>
