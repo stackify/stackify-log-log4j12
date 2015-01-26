@@ -8,11 +8,11 @@
 	<name>Stackify Log Appender for Log4j</name>
 	<description>Stackify Log Appender for Log4j</description>
 	<url>https://github.com/stackify/stackify-log-log4j12</url>
-		<parent>
+	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
-		</parent>
+	</parent>
 	
 	<licenses>
     	<license>
@@ -259,5 +259,4 @@
 		</profile>
 	</profiles>
 	
-	<packaging>ear</packaging>
 </project>
