@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/stackify/stackify-log-log4j12.png)](https://travis-ci.org/stackify/stackify-log-log4j12)
 [![Coverage Status](https://coveralls.io/repos/stackify/stackify-log-log4j12/badge.png?branch=master)](https://coveralls.io/r/stackify/stackify-log-log4j12?branch=master)
+[![Maven Central](https://img.shields.io/maven-central/v/com.stackify/stackify-log-log4j12.svg)](http://mvnrepository.com/artifact/com.stackify/stackify-log-log4j12)
 
 Log4j 1.2 appenders for sending log messages and exceptions to Stackify.
 
