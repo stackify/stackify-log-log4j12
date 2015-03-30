@@ -14,6 +14,17 @@ Sign Up for a Trial:
 
 http://www.stackify.com/sign-up/
 
+## Installation
+
+Add it as a maven dependency:
+```xml
+<dependency>
+    <groupId>com.stackify</groupId>
+    <artifactId>stackify-log-log4j12</artifactId>
+    <version>INSERT_LATEST_MAVEN_CENTRAL_VERSION</version>
+</dependency>
+```
+
 ## Usage
 
 Example appender configuration (*.properties file):
@@ -38,17 +49,6 @@ Note: *If you are logging from a device that has the stackify-agent installed, t
 Be sure to shutdown Log4j to flush this appender of any errors and shutdown the background thread:
 ```java
 LogManager.shutdown();
-```
-
-## Installation
-
-Add it as a maven dependency:
-```xml
-<dependency>
-    <groupId>com.stackify</groupId>
-    <artifactId>stackify-log-log4j12</artifactId>
-    <version>1.1.2</version>
-</dependency>
 ```
 
 ## License
