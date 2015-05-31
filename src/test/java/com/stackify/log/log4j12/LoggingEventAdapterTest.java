@@ -259,7 +259,7 @@ public class LoggingEventAdapterTest {
 	}
 	
 	/**
-	 * 
+	 * testIsErrorLevel
 	 */
 	@Test
 	public void testIsErrorLevel() {
