@@ -49,7 +49,7 @@ Note: *If you are logging from a device that has the stackify-agent installed, t
 
 Be sure to shutdown Log4j to flush this appender of any errors and shutdown the background thread:
 ```java
-LogManager.shutdown();
+org.apache.log4j.LogManager.shutdown();
 ```
 
 ## License
