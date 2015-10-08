@@ -248,4 +248,18 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 	public boolean isErrorLevel(final LoggingEvent event) {
 		return event.getLevel().isGreaterOrEqual(Level.ERROR);
 	}
+
+	/**
+	 * @see com.stackify.api.common.log.EventAdapter#getClassName(java.lang.Object)
+	 */
+	@Override
+	public String getClassName(final LoggingEvent event) {
+		LocationInfo locInfo = event.getLocationInformation();
+
+		if (locInfo != null) {			
+			return locInfo.getClassName();
+		}
+		
+		return null;
+	}
 }

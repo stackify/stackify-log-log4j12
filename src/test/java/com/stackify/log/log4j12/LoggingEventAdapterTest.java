@@ -299,4 +299,23 @@ public class LoggingEventAdapterTest {
 		Assert.assertNotNull(error);
 		Assert.assertEquals("StringException", error.getError().getErrorType());
 	}
+	
+	/**
+	 * testGetClassName
+	 */
+	@Test
+	public void testGetClassName() {
+		LocationInfo locInfo = Mockito.mock(LocationInfo.class);
+		Mockito.when(locInfo.getClassName()).thenReturn("class");
+		
+		LoggingEvent event = Mockito.mock(LoggingEvent.class);
+		Mockito.when(event.getLocationInformation()).thenReturn(locInfo);
+		
+		LoggingEventAdapter adapter = new LoggingEventAdapter(Mockito.mock(EnvironmentDetail.class));
+
+		String className = adapter.getClassName(event);
+		
+		Assert.assertNotNull(className);
+		Assert.assertEquals("class", className);
+	}
 }
