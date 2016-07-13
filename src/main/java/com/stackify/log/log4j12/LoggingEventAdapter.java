@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.stackify.api.common.log.APMLogData;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
@@ -119,14 +120,14 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 			
 			builder.error(Throwables.toErrorItem(getMessage(event), className, methodName, lineNumber));
 		}
-		
-		String user = ServletLogContext.getUser();
-		
+
+		String user = APMLogData.isLinked() ? APMLogData.getUser() : ServletLogContext.getUser();
+
 		if (user != null) {
 			builder.userName(user);
 		}
-		
-		WebRequestDetail webRequest = ServletLogContext.getWebRequest();
+
+		WebRequestDetail webRequest = APMLogData.isLinked() ? APMLogData.getWebRequest() : ServletLogContext.getWebRequest();
 		
 		if (webRequest != null) {
 			builder.webRequestDetail(webRequest);
@@ -162,7 +163,7 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		builder.epochMs(event.getTimeStamp());
 		builder.level(event.getLevel().toString().toLowerCase());
 
-		String transactionId = ServletLogContext.getTransactionId();
+		String transactionId = APMLogData.isLinked() ? APMLogData.getTransactionId() : ServletLogContext.getTransactionId();
 		
 		if (transactionId != null) {
 			builder.transId(transactionId);
