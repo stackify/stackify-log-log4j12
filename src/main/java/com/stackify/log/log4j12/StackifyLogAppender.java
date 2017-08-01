@@ -15,6 +15,9 @@
  */
 package com.stackify.log.log4j12;
 
+import com.stackify.api.common.mask.Masker;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.log4j.spi.LoggingEvent;
 
 import com.stackify.api.common.ApiClients;
@@ -82,7 +85,27 @@ public class StackifyLogAppender extends NonReentrantAppender {
 	 * Generic log appender
 	 */
 	private LogAppender<LoggingEvent> logAppender;
-	
+
+	@Setter
+	@Getter
+	private String maskEnabled;
+
+	@Setter
+	@Getter
+	private String maskCreditCard;
+
+	@Setter
+	@Getter
+	private String maskSSN;
+
+	@Setter
+	@Getter
+	private String maskIP;
+
+	@Setter
+	@Getter
+	private String maskCustom;
+
 	/**
 	 * @return the apiUrl
 	 */
@@ -145,11 +168,11 @@ public class StackifyLogAppender extends NonReentrantAppender {
 	@Override
 	public void activateOptions() {
 		super.activateOptions();
-		
+
 		// build the api config
 		
 		ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, apiKey, application, environment);
-		
+
 		// get the client project name with version
 
 		String clientName = ApiClients.getApiClient(StackifyLogAppender.class, "/stackify-log-log4j12.properties", "stackify-log-log4j12");
@@ -157,7 +180,41 @@ public class StackifyLogAppender extends NonReentrantAppender {
 		// build the log appender
 		
 		try {
-			this.logAppender = new LogAppender<LoggingEvent>(clientName, new LoggingEventAdapter(apiConfig.getEnvDetail()));
+
+			// setup masker
+
+			if (maskEnabled == null) {
+				maskEnabled = Boolean.TRUE.toString();
+			}
+
+			Masker masker = new Masker();
+			if (Boolean.parseBoolean(maskEnabled)) {
+
+				// set default masks
+				masker.addMask(Masker.MASK_CREDITCARD);
+				masker.addMask(Masker.MASK_SSN);
+
+				if (maskCreditCard != null && !Boolean.parseBoolean(maskCreditCard)) {
+					masker.removeMask(Masker.MASK_CREDITCARD);
+				}
+
+				if (maskSSN != null && !Boolean.parseBoolean(maskSSN)) {
+					masker.removeMask(Masker.MASK_SSN);
+				}
+
+				if (maskIP != null && Boolean.parseBoolean(maskIP)) {
+					masker.addMask(Masker.MASK_IP);
+				}
+
+				if (maskCustom != null) {
+					masker.addMask(maskCustom);
+				}
+
+			} else {
+				masker.clearMasks();
+			}
+
+			this.logAppender = new LogAppender<LoggingEvent>(clientName, new LoggingEventAdapter(apiConfig.getEnvDetail()), masker);
 			this.logAppender.activate(apiConfig);
 		} catch (Exception e) {
 			errorHandler.error("Exception starting the Stackify_LogBackgroundService", e, 0);

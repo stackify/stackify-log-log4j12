@@ -29,7 +29,7 @@ Add it as a maven dependency:
 ## Usage
 
 Example appender configuration (*.properties file):
-```
+```properties
 log4j.appender.STACKIFY=com.stackify.log.log4j12.StackifyLogAppender
 log4j.appender.STACKIFY.apiKey=YOUR_API_KEY
 log4j.appender.STACKIFY.application=YOUR_APPLICATION_NAME
@@ -41,7 +41,7 @@ Example appender configuration (*.xml file):
 <appender name="STACKIFY" class="com.stackify.log.log4j12.StackifyLogAppender">
     <param name="apiKey" value="YOUR_API_KEY"/>
     <param name="application" value="YOUR_APPLICATION_NAME"/>
-    <param name="environment" value="YOUR_ENVIRONMENT"/>
+    <param name="environment" value="YOUR_ENVIRONMENT"/>  
 </appender>
 ```
 
@@ -51,6 +51,51 @@ Be sure to shutdown Log4j to flush this appender of any errors and shutdown the 
 ```java
 org.apache.log4j.LogManager.shutdown();
 ```
+
+
+## Masking 
+
+The Stackify appender has built-in data masking for credit cards and social security number values.
+
+**Disable Masking:**
+
+Add `<MaskEnabled>false</MaskEnabled>` inside the `<StackifyLog> ... </StackifyLog>` tag.
+
+**Customize Masking:**
+
+The example below has the following customizations: 
+
+1. Credit Card value masking is disabled (`<param name="maskCreditCard" value="false"/>`)
+2. IP Address masking is enabled (`<param name="maskIP" value="true"/>`).
+3. Custom masking to remove vowels using a regex (`<param name="maskCustom" value="[aeiou]"/> `)
+
+```properties
+log4j.appender.STACKIFY=com.stackify.log.log4j12.StackifyLogAppender
+log4j.appender.STACKIFY.apiKey=YOUR_API_KEY
+log4j.appender.STACKIFY.application=YOUR_APPLICATION_NAME
+log4j.appender.STACKIFY.environment=YOUR_ENVIRONMENT
+ 
+log4j.appender.STACKIFY.maskEnabled=true
+log4j.appender.STACKIFY.maskCreditCard=false
+log4j.appender.STACKIFY.maskSSN=true
+log4j.appender.STACKIFY.maskIP=true
+log4j.appender.STACKIFY.maskCustom=[aeiou]
+```
+ 
+```xml
+<appender name="STACKIFY" class="com.stackify.log.log4j12.StackifyLogAppender">
+    <param name="apiKey" value="YOUR_API_KEY"/>
+    <param name="application" value="YOUR_APPLICATION_NAME"/>
+    <param name="environment" value="YOUR_ENVIRONMENT"/>
+      
+    <param name="maskEnabled" value="true"/>
+    <param name="maskCreditCard" value="false"/>
+    <param name="maskSSN" value="true"/>
+    <param name="maskIP" value="true"/>
+    <param name="maskCustom" value="[aeiou]"/> 
+</appender>
+```
+
 
 ## License
 
