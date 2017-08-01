@@ -59,7 +59,7 @@ The Stackify appender has built-in data masking for credit cards and social secu
 
 **Disable Masking:**
 
-Add `<MaskEnabled>false</MaskEnabled>` inside the `<StackifyLog> ... </StackifyLog>` tag.
+Add `<param name="maskEnabled" value="true"/>` inside the `<appender> ... </appender>` tag.
 
 **Customize Masking:**
 
