@@ -183,12 +183,8 @@ public class StackifyLogAppender extends NonReentrantAppender {
 
 			// setup masker
 
-			if (maskEnabled == null) {
-				maskEnabled = Boolean.TRUE.toString();
-			}
-
 			Masker masker = new Masker();
-			if (Boolean.parseBoolean(maskEnabled)) {
+			if (maskEnabled != null && Boolean.parseBoolean(maskEnabled)) {
 
 				// set default masks
 				masker.addMask(Masker.MASK_CREDITCARD);
