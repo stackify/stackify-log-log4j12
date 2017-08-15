@@ -15,19 +15,18 @@
  */
 package com.stackify.log.log4j12;
 
+import com.stackify.api.common.ApiClients;
+import com.stackify.api.common.ApiConfiguration;
+import com.stackify.api.common.ApiConfigurations;
+import com.stackify.api.common.log.LogAppender;
 import com.stackify.api.common.mask.Masker;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.log4j.spi.LoggingEvent;
 
-import com.stackify.api.common.ApiClients;
-import com.stackify.api.common.ApiConfiguration;
-import com.stackify.api.common.ApiConfigurations;
-import com.stackify.api.common.log.LogAppender;
-
 /**
  * Log4j 1.2 logger appender for sending logs to Stackify.
- * 
+ * <p>
  * <p>
  * Example appender configuration (*.properties file):
  * <pre>
@@ -38,7 +37,7 @@ import com.stackify.api.common.log.LogAppender;
  * log4j.appender.STACKIFY.environment=YOUR_ENVIRONMENT
  * }
  * </pre>
- * 
+ * <p>
  * <p>
  * Example appender configuration (*.xml file):
  * <pre>
@@ -50,7 +49,7 @@ import com.stackify.api.common.log.LogAppender;
  * </appender>
  * }
  * </pre>
- *
+ * <p>
  * <p>
  * Be sure to shutdown Log4j to flush this appender of any logs and shutdown the background thread:
  * <pre>
@@ -59,193 +58,134 @@ import com.stackify.api.common.log.LogAppender;
  *
  * @author Eric Martin
  */
+@Setter
+@Getter
 public class StackifyLogAppender extends NonReentrantAppender {
-		
-	/**
-	 * API URL (Appender configuration parameter)
-	 */
-	private String apiUrl = "https://api.stackify.com";
-	
-	/**
-	 * API Key (Appender configuration parameter)
-	 */
-	private String apiKey = null;
-	
-	/**
-	 * Application name (Appender configuration parameter)
-	 */
-	private String application = null;
-	
-	/**
-	 * Environment (Appender configuration parameter)
-	 */
-	private String environment = null;
-		
-	/**
-	 * Generic log appender
-	 */
-	private LogAppender<LoggingEvent> logAppender;
 
-	@Setter
-	@Getter
-	private String maskEnabled;
+    /**
+     * API URL (Appender configuration parameter)
+     */
+    private String apiUrl = "https://api.stackify.com";
 
-	@Setter
-	@Getter
-	private String maskCreditCard;
+    /**
+     * Auth API URL
+     */
+    private String authUrl = "https://auth.stackify.net";
 
-	@Setter
-	@Getter
-	private String maskSSN;
+    /**
+     * API Key (Appender configuration parameter)
+     */
+    private String apiKey = null;
 
-	@Setter
-	@Getter
-	private String maskIP;
+    /**
+     * Application name (Appender configuration parameter)
+     */
+    private String application = null;
 
-	@Setter
-	@Getter
-	private String maskCustom;
+    /**
+     * Environment (Appender configuration parameter)
+     */
+    private String environment = null;
 
-	/**
-	 * @return the apiUrl
-	 */
-	public String getApiUrl() {
-		return apiUrl;
-	}
+    /**
+     * Generic log appender
+     */
+    private LogAppender<LoggingEvent> logAppender;
 
-	/**
-	 * @param apiUrl the apiUrl to set
-	 */
-	public void setApiUrl(String apiUrl) {
-		this.apiUrl = apiUrl;
-	}
+    private String maskEnabled;
 
-	/**
-	 * @return the apiKey
-	 */
-	public String getApiKey() {
-		return apiKey;
-	}
+    private String maskCreditCard;
 
-	/**
-	 * @param apiKey the apiKey to set
-	 */
-	public void setApiKey(String apiKey) {
-		this.apiKey = apiKey;
-	}
+    private String maskSSN;
 
-	/**
-	 * @return the application
-	 */
-	public String getApplication() {
-		return application;
-	}
+    private String maskIP;
 
-	/**
-	 * @param application the application to set
-	 */
-	public void setApplication(String application) {
-		this.application = application;
-	}
+    private String maskCustom;
 
-	/**
-	 * @return the environment
-	 */
-	public String getEnvironment() {
-		return environment;
-	}
+    /**
+     * @see org.apache.log4j.AppenderSkeleton#activateOptions()
+     */
+    @Override
+    public void activateOptions() {
+        super.activateOptions();
 
-	/**
-	 * @param environment the environment to set
-	 */
-	public void setEnvironment(String environment) {
-		this.environment = environment;
-	}
-	
-	/**
-	 * @see org.apache.log4j.AppenderSkeleton#activateOptions()
-	 */
-	@Override
-	public void activateOptions() {
-		super.activateOptions();
+        // build the api config
 
-		// build the api config
-		
-		ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, apiKey, application, environment);
+        ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, authUrl, apiKey, application, environment);
 
-		// get the client project name with version
+        // get the client project name with version
 
-		String clientName = ApiClients.getApiClient(StackifyLogAppender.class, "/stackify-log-log4j12.properties", "stackify-log-log4j12");
+        String clientName = ApiClients.getApiClient(StackifyLogAppender.class, "/stackify-log-log4j12.properties", "stackify-log-log4j12");
 
-		// build the log appender
-		
-		try {
+        // build the log appender
 
-			// setup masker
+        try {
 
-			Masker masker = new Masker();
-			if (maskEnabled != null && Boolean.parseBoolean(maskEnabled)) {
+            // setup masker
 
-				// set default masks
-				masker.addMask(Masker.MASK_CREDITCARD);
-				masker.addMask(Masker.MASK_SSN);
+            Masker masker = new Masker();
+            if (maskEnabled != null && Boolean.parseBoolean(maskEnabled)) {
 
-				if (maskCreditCard != null && !Boolean.parseBoolean(maskCreditCard)) {
-					masker.removeMask(Masker.MASK_CREDITCARD);
-				}
+                // set default masks
+                masker.addMask(Masker.MASK_CREDITCARD);
+                masker.addMask(Masker.MASK_SSN);
 
-				if (maskSSN != null && !Boolean.parseBoolean(maskSSN)) {
-					masker.removeMask(Masker.MASK_SSN);
-				}
+                if (maskCreditCard != null && !Boolean.parseBoolean(maskCreditCard)) {
+                    masker.removeMask(Masker.MASK_CREDITCARD);
+                }
 
-				if (maskIP != null && Boolean.parseBoolean(maskIP)) {
-					masker.addMask(Masker.MASK_IP);
-				}
+                if (maskSSN != null && !Boolean.parseBoolean(maskSSN)) {
+                    masker.removeMask(Masker.MASK_SSN);
+                }
 
-				if (maskCustom != null) {
-					masker.addMask(maskCustom);
-				}
+                if (maskIP != null && Boolean.parseBoolean(maskIP)) {
+                    masker.addMask(Masker.MASK_IP);
+                }
 
-			} else {
-				masker.clearMasks();
-			}
+                if (maskCustom != null) {
+                    masker.addMask(maskCustom);
+                }
 
-			this.logAppender = new LogAppender<LoggingEvent>(clientName, new LoggingEventAdapter(apiConfig.getEnvDetail()), masker);
-			this.logAppender.activate(apiConfig);
-		} catch (Exception e) {
-			errorHandler.error("Exception starting the Stackify_LogBackgroundService", e, 0);
-		}
-	}
-	
-	/**
-	 * @see com.stackify.log.log4j12.NonReentrantAppender#subAppend(org.apache.log4j.spi.LoggingEvent)
-	 */
-	@Override
-	protected void subAppend(final LoggingEvent event) {
-		try {
-			this.logAppender.append(event);
-		} catch (Exception e) {
-			errorHandler.error("Exception appending event to Stackify Log Appender", e, 0);
-		}
-	}
-	
-	/**
-	 * @see org.apache.log4j.Appender#close()
-	 */
-	@Override
-	public void close() {
-		try {
-			this.logAppender.close();
-		} catch (Exception e) {
-			errorHandler.error("Exception closing Stackify Log Appender", e, 0);
-		}
-	}
+            } else {
+                masker.clearMasks();
+            }
 
-	/**
-	 * @see org.apache.log4j.Appender#requiresLayout()
-	 */
-	@Override
-	public boolean requiresLayout() {
-		return false;
-	}	
+            this.logAppender = new LogAppender<LoggingEvent>(clientName, new LoggingEventAdapter(apiConfig.getEnvDetail()), masker);
+            this.logAppender.activate(apiConfig);
+        } catch (Exception e) {
+            errorHandler.error("Exception starting the Stackify_LogBackgroundService", e, 0);
+        }
+    }
+
+    /**
+     * @see com.stackify.log.log4j12.NonReentrantAppender#subAppend(org.apache.log4j.spi.LoggingEvent)
+     */
+    @Override
+    protected void subAppend(final LoggingEvent event) {
+        try {
+            this.logAppender.append(event);
+        } catch (Exception e) {
+            errorHandler.error("Exception appending event to Stackify Log Appender", e, 0);
+        }
+    }
+
+    /**
+     * @see org.apache.log4j.Appender#close()
+     */
+    @Override
+    public void close() {
+        try {
+            this.logAppender.close();
+        } catch (Exception e) {
+            errorHandler.error("Exception closing Stackify Log Appender", e, 0);
+        }
+    }
+
+    /**
+     * @see org.apache.log4j.Appender#requiresLayout()
+     */
+    @Override
+    public boolean requiresLayout() {
+        return false;
+    }
 }
