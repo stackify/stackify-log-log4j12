@@ -88,6 +88,10 @@ public class StackifyLogAppender extends NonReentrantAppender {
 
 	@Setter
 	@Getter
+	private String skipJson = "false";
+
+	@Setter
+	@Getter
 	private String maskEnabled;
 
 	@Setter
@@ -210,7 +214,11 @@ public class StackifyLogAppender extends NonReentrantAppender {
 				masker.clearMasks();
 			}
 
-			this.logAppender = new LogAppender<LoggingEvent>(clientName, new LoggingEventAdapter(apiConfig.getEnvDetail()), masker);
+			this.logAppender = new LogAppender<LoggingEvent>(
+					clientName,
+					new LoggingEventAdapter(apiConfig.getEnvDetail()),
+					masker,
+					skipJson != null && Boolean.parseBoolean(skipJson));
 			this.logAppender.activate(apiConfig);
 		} catch (Exception e) {
 			errorHandler.error("Exception starting the Stackify_LogBackgroundService", e, 0);
