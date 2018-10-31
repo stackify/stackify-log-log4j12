@@ -27,7 +27,7 @@ import com.stackify.api.common.log.LogAppender;
 
 /**
  * Log4j 1.2 logger appender for sending logs to Stackify.
- * 
+ *
  * <p>
  * Example appender configuration (*.properties file):
  * <pre>
@@ -38,7 +38,7 @@ import com.stackify.api.common.log.LogAppender;
  * log4j.appender.STACKIFY.environment=YOUR_ENVIRONMENT
  * }
  * </pre>
- * 
+ *
  * <p>
  * Example appender configuration (*.xml file):
  * <pre>
@@ -60,27 +60,27 @@ import com.stackify.api.common.log.LogAppender;
  * @author Eric Martin
  */
 public class StackifyLogAppender extends NonReentrantAppender {
-		
+
 	/**
 	 * API URL (Appender configuration parameter)
 	 */
 	private String apiUrl = "https://api.stackify.com";
-	
+
 	/**
 	 * API Key (Appender configuration parameter)
 	 */
 	private String apiKey = null;
-	
+
 	/**
 	 * Application name (Appender configuration parameter)
 	 */
 	private String application = null;
-	
+
 	/**
 	 * Environment (Appender configuration parameter)
 	 */
 	private String environment = null;
-		
+
 	/**
 	 * Generic log appender
 	 */
@@ -165,7 +165,7 @@ public class StackifyLogAppender extends NonReentrantAppender {
 	public void setEnvironment(String environment) {
 		this.environment = environment;
 	}
-	
+
 	/**
 	 * @see org.apache.log4j.AppenderSkeleton#activateOptions()
 	 */
@@ -174,7 +174,7 @@ public class StackifyLogAppender extends NonReentrantAppender {
 		super.activateOptions();
 
 		// build the api config
-		
+
 		ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, apiKey, application, environment);
 
 		// get the client project name with version
@@ -182,13 +182,13 @@ public class StackifyLogAppender extends NonReentrantAppender {
 		String clientName = ApiClients.getApiClient(StackifyLogAppender.class, "/stackify-log-log4j12.properties", "stackify-log-log4j12");
 
 		// build the log appender
-		
+
 		try {
 
 			// setup masker
 
 			Masker masker = new Masker();
-			if (maskEnabled != null && Boolean.parseBoolean(maskEnabled)) {
+			if (Boolean.parseBoolean(maskEnabled)) {
 
 				// set default masks
 				masker.addMask(Masker.MASK_CREDITCARD);
@@ -202,7 +202,7 @@ public class StackifyLogAppender extends NonReentrantAppender {
 					masker.removeMask(Masker.MASK_SSN);
 				}
 
-				if (maskIP != null && Boolean.parseBoolean(maskIP)) {
+				if (Boolean.parseBoolean(maskIP)) {
 					masker.addMask(Masker.MASK_IP);
 				}
 
@@ -218,13 +218,13 @@ public class StackifyLogAppender extends NonReentrantAppender {
 					clientName,
 					new LoggingEventAdapter(apiConfig.getEnvDetail()),
 					masker,
-					skipJson != null && Boolean.parseBoolean(skipJson));
+					Boolean.parseBoolean(skipJson));
 			this.logAppender.activate(apiConfig);
 		} catch (Exception e) {
 			errorHandler.error("Exception starting the Stackify_LogBackgroundService", e, 0);
 		}
 	}
-	
+
 	/**
 	 * @see com.stackify.log.log4j12.NonReentrantAppender#subAppend(org.apache.log4j.spi.LoggingEvent)
 	 */
@@ -236,7 +236,7 @@ public class StackifyLogAppender extends NonReentrantAppender {
 			errorHandler.error("Exception appending event to Stackify Log Appender", e, 0);
 		}
 	}
-	
+
 	/**
 	 * @see org.apache.log4j.Appender#close()
 	 */
@@ -255,5 +255,5 @@ public class StackifyLogAppender extends NonReentrantAppender {
 	@Override
 	public boolean requiresLayout() {
 		return false;
-	}	
+	}
 }
