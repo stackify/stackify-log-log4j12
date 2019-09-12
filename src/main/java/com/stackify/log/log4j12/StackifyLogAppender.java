@@ -88,6 +88,10 @@ public class StackifyLogAppender extends NonReentrantAppender {
 
 	@Setter
 	@Getter
+	private String transport;
+
+	@Setter
+	@Getter
 	private String skipJson = "false";
 
 	@Setter
@@ -175,7 +179,7 @@ public class StackifyLogAppender extends NonReentrantAppender {
 
 		// build the api config
 
-		ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, apiKey, application, environment);
+		ApiConfiguration apiConfig = ApiConfigurations.fromPropertiesWithOverrides(apiUrl, apiKey, application, environment, transport, "false");
 
 		// get the client project name with version
 
