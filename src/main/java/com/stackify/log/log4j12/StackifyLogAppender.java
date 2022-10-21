@@ -235,7 +235,9 @@ public class StackifyLogAppender extends NonReentrantAppender {
 	@Override
 	protected void subAppend(final LoggingEvent event) {
 		try {
-			this.logAppender.append(event);
+			if (this.logAppender != null) {
+				this.logAppender.append(event);
+			}
 		} catch (Exception e) {
 			errorHandler.error("Exception appending event to Stackify Log Appender", e, 0);
 		}
@@ -247,7 +249,9 @@ public class StackifyLogAppender extends NonReentrantAppender {
 	@Override
 	public void close() {
 		try {
-			this.logAppender.close();
+			if (this.logAppender != null) {
+				this.logAppender.close();
+			}
 		} catch (Exception e) {
 			errorHandler.error("Exception closing Stackify Log Appender", e, 0);
 		}
