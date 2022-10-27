@@ -97,7 +97,7 @@ public class LoggingEventAdapter implements EventAdapter<LoggingEvent> {
 		
 		StackifyError.Builder builder = StackifyError.newBuilder();
 		builder.environmentDetail(envDetail);		
-		builder.occurredEpochMillis(new Date(event.getTimeStamp()));
+		builder.occurredEpochMillis(event.getTimeStamp());
 		
 		if (exception != null) {
 			builder.error(Throwables.toErrorItem(getMessage(event), exception));
